@@ -1,0 +1,52 @@
+#!/bin/bash
+# Bash completion for lsd script
+
+_lsd_completion() {
+    local cur prev opts
+    COMPREPLY=()
+    cur="${COMP_WORDS[COMP_CWORD]}"
+    prev="${COMP_WORDS[COMP_CWORD-1]}"
+
+    # Options for lsd
+    opts="-a --all --ls -ls -m --maxdepth -L -l --level -1 -2 -3 -4 -5 -6 -7 -8 -9 -V --version -h --help -- --tree"
+
+    # Handle options that require arguments
+    case "${prev}" in
+        -m|--maxdepth|-L|-l|--level)
+            # Complete with numbers for level options
+            COMPREPLY=( $(compgen -W "1 2 3 4 5 6 7 8 9 10 15 20" -- ${cur}) )
+            return 0
+            ;;
+        --|--tree)
+            # After --tree, complete with tree command options
+            local tree_opts="-a -d -f -i -l -q -t -u -g -h -H -T -R -L -P -I -A -S -D -F -v -r -x -J -X -N"
+            COMPREPLY=( $(compgen -W "${tree_opts}" -- ${cur}) )
+            return 0
+            ;;
+    esac
+
+    # Check if we're after --tree option
+    local i
+    for (( i=1; i < ${#COMP_WORDS[@]}; i++ )); do
+        if [[ "${COMP_WORDS[i]}" == "--" || "${COMP_WORDS[i]}" == "--tree" ]]; then
+            # Complete with tree command options
+            local tree_opts="-a -d -f -i -l -q -t -u -g -h -H -T -R -L -P -I -A -S -D -F -v -r -x -J -X -N"
+            COMPREPLY=( $(compgen -W "${tree_opts}" -- ${cur}) )
+            return 0
+        fi
+    done
+
+    # Default completion
+    if [[ ${cur} == -* ]]; then
+        # Complete with lsd options
+        COMPREPLY=( $(compgen -W "${opts}" -- ${cur}) )
+    else
+        # Complete with directories
+        COMPREPLY=( $(compgen -d -- ${cur}) )
+    fi
+
+    return 0
+}
+
+# Register the completion function
+complete -F _lsd_completion lsd

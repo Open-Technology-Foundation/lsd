@@ -46,8 +46,10 @@ lsd [OPTIONS] [PATH...] [--|--tree TREE_OPTIONS]
 ```bash
 lsd                    # Current directory, directories only, 1 level
 lsd -a                 # Include files in addition to directories
+lsd -A                 # All files with detailed listing (combines -a --ls)
 lsd /var /tmp          # Multiple paths
 lsd -3 /home           # 3 levels deep
+lsd -L 5 /usr          # 5 levels deep (same as -m 5)
 lsd -a --ls /etc       # Files + directories with detailed listing
 ```
 
@@ -56,9 +58,10 @@ lsd -a --ls /etc       # Files + directories with detailed listing
 | Option | Description |
 |--------|-------------|
 | `-a`, `--all` | Show files and directories (default: directories only) |
-| `-m`, `--maxdepth N` | Traverse N levels (default: 1, 0=255) |
+| `-A` | Same as `-a --ls`; full listing for all files and directories |
+| `-m`, `--maxdepth`, `-L`, `-l`, `--level N` | Traverse N levels (default: 1) |
 | `-1` through `-9` | Shortcut for depth (e.g., `-3` = 3 levels) |
-| `--ls` | Show detailed file listing (permissions, size, date) |
+| `--ls`, `-ls` | Show detailed file listing (permissions, size, date) |
 | `-n`, `--nocolor` | Disable color output |
 | `-C`, `--color` | Enable color output |
 | `--`, `--tree` | Pass remaining arguments directly to `tree` |
@@ -71,6 +74,9 @@ lsd -a --ls /etc       # Files + directories with detailed listing
 # Files and directories, 2 levels, detailed listing
 lsd -a -2 --ls ~/projects
 
+# Quick full listing with -A option
+lsd -A -3 /etc         # Same as: lsd -a -3 --ls /etc
+
 # Pass custom tree options
 lsd -- -L 5 -a -I 'node_modules|.git'
 
@@ -79,9 +85,13 @@ lsd -4 /usr/local /opt
 
 # Aggregate short options
 lsd -a3 /home          # Equivalent to: lsd -a -3 /home
+lsd -AC2 ~             # All files, color, 2 levels, detailed listing
 
 # Directories only (default), no color
 lsd -n /var/log
+
+# All maxdepth aliases work the same
+lsd -L 3 /home         # Same as -m 3, -l 3, or --level 3
 ```
 
 ## Bash Completion

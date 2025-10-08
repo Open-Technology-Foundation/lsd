@@ -9,6 +9,10 @@ lsd() {
 
   while (($#)); do case "$1" in
     -a|--all)     show_all=1 ;;
+    -A)           show_all=1
+                  ls_opts=( -pugsD --timefmt=%y-%m-%dT%R )
+                  ;;
+    # -pugsD options (no long equivalents): permissions, user, group, size, date
     --ls|-ls)     ls_opts=( -pugsD --timefmt=%y-%m-%dT%R ) ;;
     -m|--maxdepth|-L|-l|--level)
                   shift
@@ -27,7 +31,7 @@ lsd() {
                   return 0
                   ;;
     --|--tree)    shift; cmd+=( "$@" ); break ;;
-    -[123456789amlLnCVh]*) #shellcheck disable=SC2046 # expand aggregated short options
+    -[123456789aAmlLnCVh]*) #shellcheck disable=SC2046 # expand aggregated short options
                   set -- '' $(printf -- "-%c " $(grep -o . <<<"${1:1}")) "${@:2}" ;;
     *)            cmd+=( "$1" ) ;;
   esac; shift; done
@@ -64,21 +68,25 @@ Usage: $SCRIPT_NAME [OPTIONS] [PATH...] [--|--tree TREE_OPTIONS]
   PATH          Directory path(s) to display (default: current directory)
 
 Options:
-  -a, --all            Show files and directories (default: dirs only)
-  -m, --maxdepth NUM   Maximum depth to traverse (default: 1, 0=unlimited)
-  -1 through -9        Shortcut for --maxdepth (e.g., -3 = 3 levels)
-  --ls                 Show detailed listing (permissions, size, date)
-  -n, --nocolor        Disable color output
-  -C, --color          Force color output (default if terminal)
-  --, --tree           Pass remaining options to tree command
-  -V, --version        Show version information
-  -h, --help           Show this help message
+  -a, --all                 Show files and directories (default: dirs only)
+  -A                        Same as -a --ls; full listing for all files/dirs
+  -m, --maxdepth, -L, -l,   Maximum depth to traverse (default: 1)
+      --level NUM
+  -1 through -9             Shortcut for level depth (e.g., -3 = 3 levels)
+  --ls, -ls                 Show detailed listing (permissions, size, date)
+  -n, --nocolor             Disable color output
+  -C, --color               Force color output (default if terminal)
+  --, --tree                Pass remaining options to tree command
+  -V, --version             Show version information
+  -h, --help                Show this help message
 
 Examples:
-  $SCRIPT_NAME                # Current dir, dirs only, 1 level
-  $SCRIPT_NAME -a             # Include files
-  $SCRIPT_NAME -3 /var        # 3 levels deep
-  $SCRIPT_NAME -a2 --ls ~     # Files + dirs, 2 levels, detailed
+  $SCRIPT_NAME                  # Current dir, dirs only, 1 level
+  $SCRIPT_NAME -a               # Include files
+  $SCRIPT_NAME -A               # Full ls listing for all files and dirs
+  $SCRIPT_NAME -3 /var          # 3 levels deep
+  $SCRIPT_NAME -L 5 /home       # 5 levels deep (same as -m 5)
+  $SCRIPT_NAME -AC2 ~           # Files+dirs, color, 2 levels, detailed ls
   $SCRIPT_NAME -- -L 5 -I .git  # Pass options to tree
 
 Requires: tree command

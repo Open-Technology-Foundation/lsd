@@ -61,7 +61,7 @@ lsd -a --ls /etc       # Files + directories with detailed listing
 | `-A` | Same as `-a --ls`; full listing for all files and directories |
 | `-m`, `--maxdepth`, `-L`, `-l`, `--level N` | Traverse N levels (default: 1) |
 | `-1` through `-9` | Shortcut for depth (e.g., `-3` = 3 levels) |
-| `--ls`, `-ls` | Show detailed file listing (permissions, size, date) |
+| `--ls` | Show detailed file listing (permissions, size, date) |
 | `-n`, `--nocolor` | Disable color output |
 | `-C`, `--color` | Enable color output |
 | `--`, `--tree` | Pass remaining arguments directly to `tree` |

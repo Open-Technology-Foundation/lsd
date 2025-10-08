@@ -1,52 +1,80 @@
 #!/bin/bash
 # Bash completion for lsd script
+#shellcheck disable=SC2207 # Standard pattern for COMPREPLY in bash completion
 
 _lsd_completion() {
-    local cur prev opts
-    COMPREPLY=()
-    cur="${COMP_WORDS[COMP_CWORD]}"
-    prev="${COMP_WORDS[COMP_CWORD-1]}"
+  local cur prev opts
+  COMPREPLY=()
+  cur="${COMP_WORDS[COMP_CWORD]}"
+  prev="${COMP_WORDS[COMP_CWORD-1]}"
 
-    # Options for lsd
-    opts="-a --all --ls -ls -m --maxdepth -L -l --level -1 -2 -3 -4 -5 -6 -7 -8 -9 -V --version -h --help -- --tree"
+  # All lsd options (single-char options that can be aggregated: a A m l n C V h, plus numeric 1-9)
+  opts="-a --all -A --ls -ls -m --maxdepth -L -l --level -1 -2 -3 -4 -5 -6 -7 -8 -9 -n --nocolor -C --color -V --version -h --help -- --tree"
 
-    # Handle options that require arguments
-    case "${prev}" in
-        -m|--maxdepth|-L|-l|--level)
-            # Complete with numbers for level options
-            COMPREPLY=( $(compgen -W "1 2 3 4 5 6 7 8 9 10 15 20" -- ${cur}) )
-            return 0
-            ;;
-        --|--tree)
-            # After --tree, complete with tree command options
-            local tree_opts="-a -d -f -i -l -q -t -u -g -h -H -T -R -L -P -I -A -S -D -F -v -r -x -J -X -N"
-            COMPREPLY=( $(compgen -W "${tree_opts}" -- ${cur}) )
-            return 0
-            ;;
-    esac
+  # Comprehensive tree command options
+  local tree_opts="-a -d -l -f -x -L -R -P -I -p -u -g -s -h -D -F -q -N -Q -v -t -c -U -r -i -A -S -n -C -X -J -H -T -o"
+  tree_opts+=" --gitignore --gitfile --ignore-case --matchdirs --metafirst --prune --info --infofile --noreport"
+  tree_opts+=" --charset --filelimit --si --du --timefmt --sort --dirsfirst --filesfirst --nolinks --hintro --houtro"
+  tree_opts+=" --fromfile --fromtabfile --fflinks --version --help"
 
-    # Check if we're after --tree option
+  # Handle aggregated short options (e.g., -aC2, -A3, -lsa5)
+  # Extract trailing digits or letters for re-expansion
+  if [[ ${cur} =~ ^-[aAmlnCVh123456789]+$ && ${#cur} -gt 2 ]]; then
+    # For aggregated options, expand them by suggesting the full form
+    # This allows bash to re-tokenize: -aC2 -> -a -C -2
+    local expanded=""
     local i
-    for (( i=1; i < ${#COMP_WORDS[@]}; i++ )); do
-        if [[ "${COMP_WORDS[i]}" == "--" || "${COMP_WORDS[i]}" == "--tree" ]]; then
-            # Complete with tree command options
-            local tree_opts="-a -d -f -i -l -q -t -u -g -h -H -T -R -L -P -I -A -S -D -F -v -r -x -J -X -N"
-            COMPREPLY=( $(compgen -W "${tree_opts}" -- ${cur}) )
-            return 0
-        fi
+    for (( i=1; i<${#cur}; i+=1 )); do
+      local char="${cur:i:1}"
+      if [[ $char =~ [0-9] ]]; then
+        expanded+=" -${char}"
+      else
+        expanded+=" -${char}"
+      fi
     done
-
-    # Default completion
-    if [[ ${cur} == -* ]]; then
-        # Complete with lsd options
-        COMPREPLY=( $(compgen -W "${opts}" -- ${cur}) )
-    else
-        # Complete with directories
-        COMPREPLY=( $(compgen -d -- ${cur}) )
-    fi
-
+    # Return empty to let default completion handle it
+    # The lsd script itself handles aggregated options via grep expansion
+    COMPREPLY=()
     return 0
+  fi
+
+  # Handle options that require arguments
+  case "${prev}" in
+    -m|--maxdepth|-L|-l|--level)
+      # Complete with numbers for level options
+      COMPREPLY=( $(compgen -W "1 2 3 4 5 6 7 8 9 10 15 20 25 30 50 100" -- "${cur}") )
+      return 0
+      ;;
+    --|--tree)
+      # After --tree, complete with tree command options
+      COMPREPLY=( $(compgen -W "${tree_opts}" -- "${cur}") )
+      return 0
+      ;;
+  esac
+
+  # Check if we're after --tree or -- option anywhere in the command line
+  local i
+  for (( i=1; i < COMP_CWORD; i+=1 )); do
+    if [[ "${COMP_WORDS[i]}" == "--" || "${COMP_WORDS[i]}" == "--tree" ]]; then
+      # Complete with tree command options
+      COMPREPLY=( $(compgen -W "${tree_opts}" -- "${cur}") )
+      return 0
+    fi
+  done
+
+  # Default completion
+  if [[ ${cur} == -* ]]; then
+    # Complete with lsd options
+    COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
+  else
+    # Complete with directories
+    compopt -o dirnames 2>/dev/null || COMPREPLY=( $(compgen -d -- "${cur}") )
+  fi
+
+  return 0
 }
 
 # Register the completion function
 complete -F _lsd_completion lsd
+
+#fin

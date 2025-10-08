@@ -13,7 +13,7 @@ lsd() {
                   ls_opts=( -pugsD --timefmt=%y-%m-%dT%R )
                   ;;
     # -pugsD options (no long equivalents): permissions, user, group, size, date
-    --ls|-ls)     ls_opts=( -pugsD --timefmt=%y-%m-%dT%R ) ;;
+    --ls)         ls_opts=( -pugsD --timefmt=%y-%m-%dT%R ) ;;
     -m|--maxdepth|-L|-l|--level)
                   shift
                   [[ "${1:-}" =~ ^[0-9]+$ ]] || {
@@ -69,11 +69,11 @@ Usage: $SCRIPT_NAME [OPTIONS] [PATH...] [--|--tree TREE_OPTIONS]
 
 Options:
   -a, --all                 Show files and directories (default: dirs only)
-  -A                        Same as -a --ls; full listing for all files/dirs
+  -A                        Same as --all --ls; full listing for all files/dirs
   -m, --maxdepth, -L, -l,   Maximum depth to traverse (default: 1)
       --level NUM
   -1 through -9             Shortcut for level depth (e.g., -3 = 3 levels)
-  --ls, -ls                 Show detailed listing (permissions, size, date)
+  --ls                      Show detailed listing (permissions, size, date)
   -n, --nocolor             Disable color output
   -C, --color               Force color output (default if terminal)
   --, --tree                Pass remaining options to tree command

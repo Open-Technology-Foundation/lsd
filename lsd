@@ -7,7 +7,9 @@ lsd() {
   local -a ls_opts=()
   local -a cmd=()
 
-  while (($#)); do case "$1" in
+  command -v error 2>/dev/null || error() { >&2 echo "${SCRIPT_NAME:-${FUNCNAME[0]}}: error: $*"; }
+  
+  while (($#)); do case $1 in
     -a|--all)     show_all=1 ;;
     -A)           show_all=1
                   ls_opts=( -pugsD --timefmt=%y-%m-%dT%R )
@@ -17,7 +19,7 @@ lsd() {
     -m|--maxdepth|-L|-l|--level)
                   shift
                   [[ "${1:-}" =~ ^[0-9]+$ ]] || {
-                    >&2 echo "${SCRIPT_NAME:-${FUNCNAME[0]}}: error: Invalid level '$1'"
+                    error "Invalid level ${1@Q}"
                     return 22
                   }
                   level=$1 ;;
@@ -26,8 +28,7 @@ lsd() {
     -C|--color)   cmd+=(-C) ;;
     -V|--version) echo "${SCRIPT_NAME:-${FUNCNAME[0]}} ${VERSION:-unknown}"
                   return 0 ;;
-    -h|--help)    lsd_usage || \
-                    >&2 echo "${FUNCNAME[0]} cannot show help as sourced module"
+    -h|--help)    lsd_usage || error "Cannot show help as sourced module"
                   return 0
                   ;;
     --|--tree)    shift; cmd+=( "$@" ); break ;;
@@ -39,8 +40,7 @@ lsd() {
 
   # Check for tree command availability
   command -v tree >/dev/null || {
-    >&2 echo "${FUNCNAME[0]}: error: tree command not found"
-    >&2 echo "sudo apt install tree"
+    error 'tree command not found (sudo apt install tree)'
     return 127
   }
 
@@ -50,17 +50,18 @@ lsd() {
 }
 declare -fx lsd
 
-if [[ ${BASH_SOURCE[0]} == "$0" ]]; then
-  set -euo pipefail
-  shopt -s inherit_errexit shift_verbose
+[[ ${BASH_SOURCE[0]} == "$0" ]] || return 0
+#!/bin/bash #semantic
+set -euo pipefail
+shopt -s inherit_errexit shift_verbose
 
-  VERSION=1.1
-  SCRIPT_PATH=$(readlink -en -- "$0")
-  SCRIPT_NAME=${SCRIPT_PATH##*/}
-  readonly -- VERSION SCRIPT_PATH SCRIPT_NAME
+declare -r VERSION=1.1
+#shellcheck disable=SC2155
+declare -r SCRIPT_PATH=$(realpath -e -- "$0")
+declare -r SCRIPT_NAME=${SCRIPT_PATH##*/}
 
-  lsd_usage() {
-    cat <<EOT
+lsd_usage() {
+  cat <<EOT
 $SCRIPT_NAME $VERSION - Display directory tree (wrapper for tree)
 
 Usage: $SCRIPT_NAME [OPTIONS] [PATH...] [--|--tree TREE_OPTIONS]
@@ -91,9 +92,7 @@ Examples:
 
 Requires: tree command
 EOT
-  }
+}
 
-  lsd "$@"
-fi
-
+lsd "$@"
 #fin

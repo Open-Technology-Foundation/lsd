@@ -6,6 +6,22 @@ A lightweight bash wrapper for `tree` that provides sensible defaults for quick 
 
 `lsd` displays directory trees with a focus on simplicity: **directories only, one level deep, directories first**. It eliminates the need to remember `tree` flags for common operations.
 
+## Quick Install
+
+Install with a single command:
+
+```bash
+curl -sSL https://raw.githubusercontent.com/Open-Technology-Foundation/lsd/main/install.sh | sudo bash
+```
+
+Or using wget:
+
+```bash
+wget -qO- https://raw.githubusercontent.com/Open-Technology-Foundation/lsd/main/install.sh | sudo bash
+```
+
+This will install lsd, its manpage, and bash completion to `/usr/local`.
+
 ## Features
 
 - Directories-only view by default (use `-a` to include files)

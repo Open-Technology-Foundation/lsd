@@ -62,7 +62,8 @@ sudo cp lsd /usr/local/bin/
 source lsd  # Exports lsd() function
 
 # Option 3: Add to shell config for persistent use
-echo 'source /ai/scripts/File/lsd/lsd' >> ~/.bashrc
+echo 'source lsd' >> ~/.bashrc              # If lsd is in PATH
+# Or: echo 'source /path/to/lsd' >> ~/.bashrc  # For custom location
 
 # Install manpage (optional)
 sudo cp lsd.1 /usr/local/share/man/man1/

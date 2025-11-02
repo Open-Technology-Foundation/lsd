@@ -35,6 +35,7 @@ help:
 	@echo "  make check         - Check dependencies (tree command)"
 	@echo "  make install       - Install all components (requires sudo)"
 	@echo "  make uninstall     - Remove all installed components (requires sudo)"
+	@echo "  make install-colors - Set up enhanced colors (optional)"
 	@echo "  make test          - Run basic functionality tests"
 	@echo "  make clean         - Remove temporary files"
 	@echo ""
@@ -60,6 +61,20 @@ check:
 	@echo "✓ All dependencies satisfied"
 	@echo "  - tree: $$(command -v tree)"
 	@echo "  - bash: $$(bash --version | head -n1)"
+	@echo ""
+	@echo "◉ Optional: Checking color support..."
+	@if command -v dircolors >/dev/null 2>&1; then \
+		echo "✓ dircolors available: $$(command -v dircolors)"; \
+		if [ -f "$$HOME/.dircolors" ]; then \
+			echo "  - Config: ~/.dircolors (present)"; \
+			echo "  - Colors: Enhanced colors configured"; \
+		else \
+			echo "  - Config: ~/.dircolors (not found)"; \
+			echo "  - Run 'make install-colors' to set up enhanced colors"; \
+		fi; \
+	else \
+		echo "  dircolors not available (tree will use built-in colors)"; \
+	fi
 
 .PHONY: install
 install: check install-script install-man install-completion
@@ -74,6 +89,11 @@ install: check install-script install-man install-completion
 	@echo ""
 	@echo "To enable bash completion, start a new shell or run:"
 	@echo "  source $(COMPLETIONDIR)/lsd"
+	@echo ""
+	@if command -v dircolors >/dev/null 2>&1 && [ ! -f "$$HOME/.dircolors" ]; then \
+		echo "For enhanced colors, run:"; \
+		echo "  make install-colors"; \
+	fi
 
 .PHONY: install-script
 install-script:
@@ -160,5 +180,53 @@ clean:
 	@echo "◉ Cleaning temporary files..."
 	@rm -f *~ *.bak .*.swp
 	@echo "✓ Clean complete"
+
+.PHONY: install-colors
+install-colors:
+	@echo "◉ Enhanced Color Setup"; \
+	echo ""; \
+	if ! command -v dircolors >/dev/null 2>&1; then \
+		echo "✗ dircolors not found. This feature requires dircolors."; \
+		echo "  Install with: sudo apt install coreutils"; \
+		exit 1; \
+	fi; \
+	if [ -f "$$HOME/.dircolors" ]; then \
+		echo "  ~/.dircolors already exists"; \
+		echo ""; \
+		echo "  Current configuration is preserved."; \
+		echo "  To reconfigure, backup and remove ~/.dircolors first."; \
+		echo ""; \
+		echo "  Apply current config:"; \
+		echo "    eval \"\$$(dircolors ~/.dircolors)\""; \
+		exit 0; \
+	fi; \
+	echo "This will install trapd00r/LS_COLORS to ~/.dircolors"; \
+	echo "Project: https://github.com/trapd00r/LS_COLORS"; \
+	echo ""; \
+	read -p "Install enhanced colors? [y/N] " answer; \
+	if [ "$$answer" = "y" ] || [ "$$answer" = "Y" ]; then \
+		echo ""; \
+		echo "◉ Downloading LS_COLORS..."; \
+		if command -v curl >/dev/null 2>&1; then \
+			curl -sSL https://raw.githubusercontent.com/trapd00r/LS_COLORS/master/LS_COLORS \
+				-o "$$HOME/.dircolors" || { echo "✗ Download failed"; exit 1; }; \
+		elif command -v wget >/dev/null 2>&1; then \
+			wget -qO "$$HOME/.dircolors" \
+				https://raw.githubusercontent.com/trapd00r/LS_COLORS/master/LS_COLORS || \
+				{ echo "✗ Download failed"; exit 1; }; \
+		else \
+			echo "✗ Error: curl or wget required"; exit 1; \
+		fi; \
+		echo "✓ Installed to ~/.dircolors"; \
+		echo ""; \
+		echo "To activate the new colors:"; \
+		echo "  eval \"\$$(dircolors ~/.dircolors)\""; \
+		echo ""; \
+		echo "To make permanent, add to ~/.bashrc:"; \
+		echo "  [ -f ~/.dircolors ] && eval \"\$$(dircolors ~/.dircolors)\""; \
+	else \
+		echo ""; \
+		echo "Installation cancelled."; \
+	fi
 
 #fin

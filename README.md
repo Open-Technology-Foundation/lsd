@@ -37,6 +37,11 @@ This will install lsd, its manpage, and bash completion to `/usr/local`.
 
 **Requirements**: `tree` command must be installed
 
+**Optional (Recommended)**: `dircolors` for enhanced colorization
+- `tree` uses the `LS_COLORS` environment variable for file type colors
+- Configure via `~/.dircolors` or use projects like [trapd00r/LS_COLORS](https://github.com/trapd00r/LS_COLORS)
+- Without dircolors configuration, `tree` uses built-in default colors
+
 ### Quick Installation (Recommended)
 
 Use the provided Makefile to install all components:

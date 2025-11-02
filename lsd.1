@@ -1,0 +1,356 @@
+.TH LSD 1 "November 2025" "lsd 1.1" "User Commands"
+.SH NAME
+lsd \- display directory tree (wrapper for tree command)
+.SH SYNOPSIS
+.B lsd
+[\fIOPTIONS\fR] [\fIPATH\fR...] [\fB\-\-\fR|\fB\-\-tree\fR \fITREE_OPTIONS\fR]
+.SH DESCRIPTION
+.B lsd
+is a lightweight bash wrapper for the
+.BR tree (1)
+command that provides sensible defaults for quick directory visualization.
+By default, it displays directories only, one level deep, with directories listed first.
+.PP
+The script supports dual-mode functionality:
+.IP \(bu 2
+.B Standalone executable:
+Can be run directly as a command
+.IP \(bu 2
+.B Sourced function:
+Can be sourced into shell sessions using
+.B "source lsd"
+which exports the
+.BR lsd ()
+function
+.PP
+The script automatically detects execution mode using
+.B ${BASH_SOURCE[0]}
+and adapts accordingly.
+.SH OPTIONS
+.SS Display Options
+.TP
+.BR \-a ", " \-\-all
+Show files and directories (default: directories only)
+.TP
+.B \-A
+Equivalent to
+.BR "\-a \-\-ls" ;
+shows all files and directories with detailed listing
+.SS Depth Control
+.TP
+.BR \-m " \fINUM\fR, " \-\-maxdepth " \fINUM\fR"
+Maximum depth to traverse (default: 1)
+.TP
+.BI \-L " NUM"
+Same as
+.B \-\-maxdepth
+(tree compatibility)
+.TP
+.BI \-l " NUM"
+Same as
+.B \-\-maxdepth
+(tree compatibility)
+.TP
+.BI \-\-level " NUM"
+Same as
+.B \-\-maxdepth
+.TP
+.BR \-1 " through " \-9
+Shortcut for setting depth level (e.g.,
+.B \-3
+means 3 levels deep)
+.SS Listing Format
+.TP
+.B \-\-ls
+Show detailed listing with permissions, user, group, size, and date.
+Internally adds:
+.B "\-pugsD \-\-timefmt=%y\-%m\-%dT%R"
+to tree command
+.SS Color Options
+.TP
+.BR \-n ", " \-\-nocolor
+Disable color output
+.TP
+.BR \-C ", " \-\-color
+Force color output (default if terminal supports it)
+.SS Tree Passthrough
+.TP
+.BR \-\- ", " \-\-tree
+Pass all remaining arguments directly to the
+.BR tree (1)
+command
+.SS Information
+.TP
+.BR \-V ", " \-\-version
+Display version information
+.TP
+.BR \-h ", " \-\-help
+Display help message
+.SS Aggregated Short Options
+The script supports aggregating single-character options (e.g.,
+.B \-aC2
+is equivalent to
+.BR "\-a \-C \-2" )
+.SH ARGUMENTS
+.TP
+.I PATH
+One or more directory paths to display (default: current directory
+.BR . )
+.SH DEFAULT BEHAVIOR
+When invoked without options,
+.B lsd
+calls tree with:
+.IP \(bu 2
+.B \-L 1
+\- Maximum depth of 1 level
+.IP \(bu 2
+.B \-d
+\- Directories only (omitted when
+.B \-a
+or
+.B \-A
+specified)
+.IP \(bu 2
+.B \-\-dirsfirst
+\- List directories before files
+.SH EXIT STATUS
+.TP
+.B 0
+Success
+.TP
+.B 22
+Invalid level argument (non-numeric value provided)
+.TP
+.B 127
+tree command not found
+.SH EXAMPLES
+.SS Basic usage
+.TP
+.B lsd
+Current directory, dirs only, 1 level
+.TP
+.B lsd /var
+/var directory, dirs only, 1 level
+.TP
+.B lsd /var /tmp
+Multiple paths
+.SS Include files
+.TP
+.B lsd \-a
+Include files and directories
+.TP
+.B lsd \-A
+All files with detailed ls listing
+.SS Depth control
+.TP
+.B lsd \-3 /var
+3 levels deep
+.TP
+.B lsd \-L 5 /home
+5 levels deep
+.TP
+.B lsd \-m 5 /home
+Same as \-L 5
+.TP
+.B lsd \-\-level 5 /home
+Same as \-L 5
+.SS Detailed listings
+.TP
+.B lsd \-\-ls /etc
+Detailed listing (permissions, size, date)
+.TP
+.B lsd \-A \-3 /etc
+All files, 3 levels, detailed listing
+.SS Aggregated options
+.TP
+.B lsd \-a3 /home
+Files+dirs, 3 levels
+.TP
+.B lsd \-AC2 ~
+All, color, 2 levels, detailed listing
+.SS Color control
+.TP
+.B lsd \-n /var/log
+No color output
+.TP
+.B lsd \-C /tmp
+Force color output
+.SS Passthrough to tree
+.TP
+.B lsd \-\- \-L 5 \-I .git
+Pass options directly to tree
+.TP
+.B lsd \-\-tree \-a \-I 'node_modules|.git'
+Exclude specific directories
+.SH INSTALLATION
+.SS Using Makefile (Recommended)
+Install all components (script, manpage, bash completion) with:
+.EX
+sudo make install
+.EE
+.PP
+Install to a different prefix:
+.EX
+sudo make PREFIX=/usr install
+.EE
+.PP
+Check dependencies before installing:
+.EX
+make check
+.EE
+.PP
+View all available targets:
+.EX
+make help
+.EE
+.PP
+Uninstall all components:
+.EX
+sudo make uninstall
+.EE
+.SS Manual Installation
+.PP
+.B Standalone executable:
+.EX
+chmod +x lsd
+sudo cp lsd /usr/local/bin/
+.EE
+.PP
+.B As sourced function:
+.EX
+source lsd                           # Temporary for current shell
+echo 'source /path/to/lsd' >> ~/.bashrc  # Persistent
+.EE
+.PP
+.B Install manpage:
+.EX
+sudo cp lsd.1 /usr/local/share/man/man1/
+sudo mandb                           # Update man database
+.EE
+.PP
+.B Install bash completion:
+.EX
+sudo cp lsd.bash_completion /usr/local/share/bash-completion/completions/lsd
+.EE
+.SH BASH COMPLETION
+A bash completion script is available in
+.BR lsd.bash_completion :
+.SS Enable for current session
+.EX
+source lsd.bash_completion
+.EE
+.SS Install system-wide
+.B Modern systems (bash-completion 2.x):
+.EX
+sudo cp lsd.bash_completion /usr/local/share/bash-completion/completions/lsd
+.EE
+.PP
+.B Legacy systems:
+.EX
+sudo cp lsd.bash_completion /etc/bash_completion.d/lsd
+.EE
+.PP
+.B Note:
+The
+.B "make install"
+command automatically installs to the correct location.
+.PP
+The completion provides:
+.IP \(bu 2
+All lsd options
+.IP \(bu 2
+Numeric depth suggestions (1\-9, 10, 15, 20, 25, 30, 50, 100)
+.IP \(bu 2
+Directory name completion
+.IP \(bu 2
+tree command options after
+.B \-\-
+or
+.B \-\-tree
+.IP \(bu 2
+Support for aggregated short options
+.SH TREE OPTIONS USED INTERNALLY
+.TP
+.BI \-L " NUM"
+Max depth level
+.TP
+.B \-d
+Directories only (default unless \-a specified)
+.TP
+.B \-\-dirsfirst
+Always applied
+.TP
+.B \-pugsD
+Permissions, user, group, size, date (with \-\-ls)
+.TP
+.B \-\-timefmt=%y\-%m\-%dT%R
+ISO timestamp format (with \-\-ls)
+.SH DEPENDENCIES
+.TP
+.B Required
+.RS
+.IP \(bu 2
+.BR tree (1)
+command (install with:
+.BR "sudo apt install tree" )
+.IP \(bu 2
+Bash 4.0 or later
+.RE
+.SH ERROR HANDLING
+The script validates:
+.IP \(bu 2
+tree command availability (error code 127 if missing)
+.IP \(bu 2
+Numeric level arguments (error code 22 for invalid input)
+.IP \(bu 2
+All error messages sent to stderr
+.SH FILES
+.TP
+.B lsd
+Main executable script
+.TP
+.B lsd.bash_completion
+Bash completion definitions
+.TP
+.B lsd.1
+Manual page (this file)
+.TP
+.B Makefile
+Installation system
+.TP
+.B BASH\-CODING\-STANDARD.md
+Coding standards (symlink)
+.SH NOTES
+.IP 1. 4
+The script uses
+.B "set \-euo pipefail"
+for strict error handling when run standalone
+.IP 2. 4
+When sourced, the function is exported with
+.B "declare \-fx lsd"
+.IP 3. 4
+The
+.B \-\-ls
+option uses ISO-style timestamp format:
+.B %y\-%m\-%dT%R
+(e.g., 25\-11\-02T14:30)
+.IP 4. 4
+Option
+.B \-A
+is a convenience shortcut that combines
+.B \-a
+and
+.B \-\-ls
+.IP 5. 4
+All maxdepth option variants
+.RB ( \-m ", " \-\-maxdepth ", " \-L ", " \-l ", " \-\-level )
+are functionally identical
+.IP 6. 4
+When no path is specified, defaults to current directory
+.RB ( . )
+.SH AUTHOR
+Part of the Okusi Group file utilities
+.SH SEE ALSO
+.BR tree (1),
+.BR ls (1),
+.BR find (1)

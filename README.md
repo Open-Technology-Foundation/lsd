@@ -21,6 +21,36 @@ A lightweight bash wrapper for `tree` that provides sensible defaults for quick 
 
 **Requirements**: `tree` command must be installed
 
+### Quick Installation (Recommended)
+
+Use the provided Makefile to install all components:
+
+```bash
+# Install to /usr/local (default)
+sudo make install
+
+# Install to /usr
+sudo make PREFIX=/usr install
+
+# Check dependencies first
+make check
+
+# See all available options
+make help
+```
+
+This installs:
+- Script to `/usr/local/bin/lsd`
+- Manpage to `/usr/local/share/man/man1/lsd.1`
+- Bash completion to `/usr/local/share/bash-completion/completions/lsd`
+
+To uninstall:
+```bash
+sudo make uninstall
+```
+
+### Manual Installation
+
 ```bash
 # Make executable
 chmod +x lsd
@@ -33,6 +63,13 @@ source lsd  # Exports lsd() function
 
 # Option 3: Add to shell config for persistent use
 echo 'source /ai/scripts/File/lsd/lsd' >> ~/.bashrc
+
+# Install manpage (optional)
+sudo cp lsd.1 /usr/local/share/man/man1/
+sudo mandb
+
+# Install bash completion (optional)
+sudo cp lsd.bash_completion /usr/local/share/bash-completion/completions/lsd
 ```
 
 ## Usage
@@ -99,13 +136,35 @@ lsd -L 3 /home         # Same as -m 3, -l 3, or --level 3
 Enable tab completion for lsd options and directories:
 
 ```bash
-source .bash_completion
+source lsd.bash_completion
 ```
 
 Or install system-wide:
 ```bash
-sudo cp .bash_completion /etc/bash_completion.d/lsd
+sudo cp lsd.bash_completion /etc/bash_completion.d/lsd
 ```
+
+## Manual Page
+
+A comprehensive Unix manual page is available in `lsd.1`.
+
+**View without installing:**
+```bash
+man ./lsd.1
+```
+
+**Install system-wide:**
+```bash
+sudo cp lsd.1 /usr/local/man/man1/
+sudo mandb  # Update man database
+```
+
+**Access after installation:**
+```bash
+man lsd
+```
+
+The manpage includes detailed descriptions of all options, examples, installation instructions, and technical notes about dual-mode functionality.
 
 ## Default Behavior
 

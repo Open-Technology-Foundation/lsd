@@ -26,7 +26,7 @@ lsd() {
     -C|--color)   cmd+=(-C) ;;
     -V|--version) echo "${SCRIPT_NAME:-${FUNCNAME[0]}} ${VERSION:-unknown}"
                   return 0 ;;
-    -h|--help)    lsd_usage || error "Cannot show help as sourced module"
+    -h|--help)    lsd_usage || error 'Cannot show help as sourced module'
                   return 0
                   ;;
     --|--tree)    shift; cmd+=( "$@" ); break ;;

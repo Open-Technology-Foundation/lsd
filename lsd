@@ -2,10 +2,8 @@
 # Display directory tree. Wrapper for 'tree' command.
 
 lsd() {
-  local -i level=1
-  local -i show_all=0
-  local -a ls_opts=()
-  local -a cmd=()
+  local -i level=1 show_all=0
+  local -a ls_opts=() cmd=()
 
   command -v error 2>/dev/null || error() { >&2 echo "${SCRIPT_NAME:-${FUNCNAME[0]}}: error: $*"; }
   
@@ -51,6 +49,7 @@ lsd() {
 declare -fx lsd
 
 [[ ${BASH_SOURCE[0]} == "$0" ]] || return 0
+
 #!/bin/bash #semantic
 set -euo pipefail
 shopt -s inherit_errexit shift_verbose

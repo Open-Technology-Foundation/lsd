@@ -20,7 +20,7 @@ lsd() {
                     error 'No value for --maxdepth'
                     return 22
                   } 
-                  [[ "${1:-}" =~ ^[0-9]+$ ]] || {
+                  [[ $1 =~ ^[0-9]+$ ]] || {
                     error "Invalid level ${1@Q}"
                     return 22
                   }
@@ -34,26 +34,31 @@ lsd() {
                   return 0
                   ;;
     --|--tree)    shift; cmd+=("$@"); break ;;
-    -[123456789aAmlLnCVh]*) #shellcheck disable=SC2046 # expand aggregated short options
-                  set -- '' $(printf -- '-%c ' $(grep -o . <<<"${1:1}")) "${@:2}" ;;
+
+    -[123456789aAmlLnCVh]?*)
+                  set -- "${1:0:2}" "-${1:2}" "${@:2}"; continue ;;
+
     *)            cmd+=("$1") ;;
   esac; shift; done
   (( ${#cmd[@]} )) || cmd=( '.' )
 
   # Check for tree command availability
-  command -v tree >/dev/null || {
+  local -- tree=''
+  tree=$(command -v tree 2>/dev/null) || {
     error 'tree command not found (sudo apt install tree)'
     return 127
   }
 
-  local -a tree_opts=(-L "$level")
+  local -a tree_opts=("$tree" -L "$level")
   ((show_all)) || tree_opts+=(-d)
-  tree "${tree_opts[@]}" "${ls_opts[@]}" --dirsfirst "${cmd[@]}"
+
+  "${tree_opts[@]}" "${ls_opts[@]}" --dirsfirst "${cmd[@]}"
 }
 declare -fx lsd
 
 [[ ${BASH_SOURCE[0]} == "$0" ]] || return 0
-#!/bin/bash #semantic
+
+# --- script mode ---
 set -euo pipefail
 shopt -s inherit_errexit shift_verbose
 
